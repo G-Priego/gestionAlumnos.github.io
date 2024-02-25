@@ -10,20 +10,27 @@ function Alumno(nombre, apellidos, edad){
 
 Alumno.prototype.guardarCalificacion = function(materiaNombre, calificacion){
     const result = this.validarMateria(materiaNombre);
+
+    // Validacion para que guardar calificacion solo en materias inscritas
     if (result !== -1) {
-        this.materias[result].calificacion = calificacion;
+        // Validacion para guardar calificacion solo una vez por materia
+        if (this.materias[result].calificacion == null) {
+            this.materias[result].calificacion = calificacion;            
+        } else {
+            showErrors("NotNullCali");
+        }
     } else{
-        console.log("El alumno no está inscrito a la materia ", materiaNombre);
+        showErrors("NoInscrito");
     }
 }
 
 Alumno.prototype.inscribirMateria = function (materia) {
     const result = this.validarMateria(materia.nombre);
-    console.log("Alumno validacion materia: ", result);// delete
+    //Validacion para que el alumno no tenga materias repetidas
     if (result == -1){
         this.materias.push(materia);
     } else{
-        console.log("El alumno ya está inscrito a ", materia.nombre);
+        showErrors("Inscrito");
     }
 }
 
@@ -70,11 +77,8 @@ function Clase(nombre){
 Clase.prototype.agregarAlumno = function (nuevoAlumno) {
     //Si el alumno no existe en el array de alumnosInscritos de la clase, se agrega.
     const result = this.validarAlumno(nuevoAlumno);
-    console.log("clase valida alumno: ", result); //delete
     if (result == -1) {
         this.alumnosInscritos.push(nuevoAlumno);        
-    } else{
-        console.log(`${nuevoAlumno.nombre} ya está inscrit@ a la clase de ${this.nombre}`);
     }
 }
 
@@ -87,12 +91,31 @@ Clase.prototype.validarAlumno = function (alumno) {
 // SECCION ALTA DE ALUMNOS
 
 function altaAlumno() {
-    const nombre = document.getElementById('nombre').value;
-    const apellidos = document.getElementById('apellidos').value;
+    const nombre = document.getElementById('nombre').value.toUpperCase();
+    const apellidos = document.getElementById('apellidos').value.toUpperCase();
     const edad = parseInt(document.getElementById('edad').value);
 
-    const alumno = new Alumno(nombre, apellidos, edad);
-    guardarAlumno(alumno);
+    // expresion para que solo se admitan cadenas de texto con letras al inicio y al final
+    const regex = /^[a-zA-ZñÑ]+(?:\s[a-zA-ZñÑ]+)*$/;
+
+    //Validacion para que solo se inscriban personas de 18 o mas
+    if (edad > 17) {
+        // validacion para que solo se guarden los datos que cumplen con la expresion
+        if (regex.test(nombre) && regex.test(apellidos)) {
+            const alumno = new Alumno(nombre, apellidos, edad);
+            const indiceAlumno = obtenerIndiceAlumno(obtenerAlumnos(), alumno);
+            // Validacion para que no existan alumnos repetidos
+            if (indiceAlumno == -1) {
+                guardarAlumno(alumno);        
+            } else {
+                showErrors("ExisteAlumno");
+            }  
+        } else{
+            showErrors("Texto");
+        }            
+    } else{
+        showErrors("Edad");
+    }    
     mostrarAlumnosInscripcion();
     mostrarAlumnosCal();
 }
@@ -107,9 +130,24 @@ function guardarAlumno(alumno) {
 // SECCION CREAR CLASES
 
 function crearClase() {
-    const claseNombre = document.getElementById('materiaNombre').value;
+    const claseNombre = document.getElementById('materiaNombre').value.toUpperCase();
     const clase = new Clase(claseNombre);
-    guardarClase(clase);
+    const indiceClase = obtenerIndiceClase(obtenerClases(), clase);
+
+    // Expresion para que los nombres de materias inicien y terminen con letras
+    const regex = /^[a-zA-ZñÑ]+(?:\s[a-zA-ZñÑ]+)*$/;
+
+    // validacion para que solo los nombres correctos se admitan
+    if (regex.test(claseNombre)) {
+        // Validacion para que no existan clases repetidas
+        if (indiceClase == -1) {
+            guardarClase(clase);        
+        } else {
+            showErrors("ClaseInscrita");
+        }        
+    } else{
+        showErrors("TextoClase");
+    }
     mostrarClasesInscripcion();
     mostrarClasesCal();
 }
@@ -153,10 +191,9 @@ function asignarClase() {
     const clasesArray = obtenerClases();
     
     const indiceAlumno = obtenerIndiceAlumno(alumnosArray, alumnoSeleccionado);
+    const indiceClase = obtenerIndiceClase(clasesArray, nuevaMateria);
 
-    const indiceClase = clasesArray.findIndex(c => c.nombre === materiaSeleccionada);
-    console.log(indiceClase);
-
+    // Validacion para asignar clase solo si la clase y alumno existen
     if (indiceAlumno!== -1 && indiceClase !== -1) {
         alumnosArray[indiceAlumno].inscribirMateria(nuevaMateria);
         clasesArray[indiceClase].agregarAlumno(alumnosArray[indiceAlumno]);
@@ -209,6 +246,7 @@ function asignarCalificacion() {
 
     const indiceAlumno = obtenerIndiceAlumno(alumnosArray, alumnoSeleccionado);
 
+    // Validacion para que solo se guarden calificaciones en numeros positivos en un alumno
     if (indiceAlumno !== -1 && calificacion >= 0) {
         alumnosArray[indiceAlumno].guardarCalificacion(materiaSeleccionada, calificacion);
         actualizarAlumno(alumnosArray);
@@ -216,7 +254,7 @@ function asignarCalificacion() {
     } else if (indiceAlumno == -1) {
         alert("Error: No se pudo encontrar al alumno.");
     } else {
-        console.log("La calificación no puede ser menor a 0");
+        showErrors("NumNegativo");
     }
 }
 
@@ -256,12 +294,27 @@ function obtenerIndiceAlumno(alumnosArray, alumnoSeleccionado) {
     return alumnosArray.findIndex(a => a.nombre === alumnoSeleccionado.nombre && a.apellidos === alumnoSeleccionado.apellidos && a.edad === alumnoSeleccionado.edad);    
 }
 
+function obtenerIndiceClase(clasesArray, clase) {
+    return clasesArray.findIndex(c => c.nombre === clase.nombre);    
+}
+
 function actualizarAlumno(alumnosArray) {
     localStorage.setItem('alumnos', JSON.stringify(alumnosArray));
 }
 
 function actualizarClase(clasesArray) {
     localStorage.setItem('clases', JSON.stringify(clasesArray));
+}
+
+function showErrors(tipo){
+    let error = document.getElementById(`error${tipo}`)
+
+    error.classList.remove("oculto")
+    error.classList.add("error")
+    setTimeout(()=>{
+        error.classList.remove("error")
+        error.classList.add("oculto")
+    }, 6000)   
 }
 
 //SECCION RESULTADOS
@@ -277,6 +330,8 @@ function buscarPorNombreApellido() {
 }
 
 function mostrarResultados(resultados) {
+    ocultarTablaDiv("promedioAlumnosResultados");
+    ocultarTablaDiv("mostrarResultadosCalificacion")
     const busquedaDiv = document.getElementById('busqueda');
     busquedaDiv.innerHTML = '';
 
@@ -317,18 +372,16 @@ function obtenerPromedioAlumnos() {
             promedio: promedio.toFixed(2)
             };
         }
-    }).filter(Boolean);//eliminar del array resultados a los elementos alumnos cuyo promedio es NaN
+    }).filter(Boolean);//elimina del array resultados a los elementos alumnos cuyo promedio es NaN
     mostrarPromedioAlumnos(resultados);
 }
 
 function mostrarPromedioAlumnos(resultados) {
-    const resultadosDiv = document.getElementById('resultados');
-    
-    // eliminar tablas previas
-    let tablaDivElement = document.getElementById("tablaDiv");
-    if (tablaDivElement !== null) {
-        tablaDivElement.remove();
-    }
+    ocultarTablaDiv("busqueda")
+    ocultarTablaDiv("mostrarResultadosCalificacion")
+    const promediosDiv = document.getElementById('promedioAlumnosResultados');
+    promediosDiv.innerHTML = "";
+
     // Crear un div para la tabla
     const tablaDiv = document.createElement('div');
     tablaDiv.setAttribute("id", "tablaDiv");
@@ -349,10 +402,14 @@ function mostrarPromedioAlumnos(resultados) {
             <td>${alumno.apellidos}</td>
             <td>${alumno.promedio}</td>
         `;
-        table.appendChild(row);
+        table.appendChild(row);    
     });
+    tablaDiv.appendChild(table);
+    promediosDiv.appendChild(tablaDiv);
 }
     function mostrarCalificacionAD(resultados) {
+        ocultarTablaDiv("mostrarResultadosCalificacion")
+        ocultarTablaDiv("busqueda")
         const resultadosDiv = document.getElementById('mostrarResultadosCalificacion');
         
         // eliminar tablas previas
@@ -387,6 +444,12 @@ function mostrarPromedioAlumnos(resultados) {
 
     // Agregar el div con la tabla al final del div "resultados"
     resultadosDiv.appendChild(tablaDiv);
+}
+
+// Funcion para que no se muestren varias tablas al mismo tiempo
+function ocultarTablaDiv(id){
+    const div = document.getElementById(id);
+    div.innerHTML = "";
 }
 
 //Ordena alumnos por nombre

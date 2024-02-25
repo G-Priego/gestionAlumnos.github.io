@@ -72,8 +72,11 @@ button:hover {
 }
 
 #resultados {
-    text-align: center;
+    text-align: center;        
+}
 
+#promedioAlumnosResultados{
+    text-align: center;    
 }
 
 #busqueda {
@@ -95,6 +98,18 @@ th {
     color: #333;
 }
 
+/*Ordenar Resultado Calificacion*/
 #mostrarResultadosCalificacion{
     text-align: center;
+  }
+.error{
+    color: rgba(156, 60, 171, 0.935);
+    font-family: inherit;
+    font-weight: bold;
+    font-size: larger;
+}
+
+.oculto{
+    display: none;
+
 }
