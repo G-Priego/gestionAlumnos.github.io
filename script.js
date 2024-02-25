@@ -289,6 +289,7 @@ function mostrarResultados(resultados) {
                 <th>Nombre</th>
                 <th>Apellidos</th>
                 <th>Edad</th>
+                <th>Calificacion</th>
             </tr>
         `;
         resultados.forEach(alumno => {
@@ -297,6 +298,7 @@ function mostrarResultados(resultados) {
                 <td>${alumno.nombre}</td>
                 <td>${alumno.apellidos}</td>
                 <td>${alumno.edad}</td>
+                <td>${alumno.calcularPromedio()}</td>
             `;
             table.appendChild(row);
         });
@@ -379,6 +381,31 @@ function ordenarAlumnosDescendente() {
     });
     mostrarResultados(alumnos);
 }
+
+//Ordenar alumnos por calificacion
+//Funcion Ordenar por calificacion Ascendente
+function ordenarAlumnosCalificacionAscendente(){
+    const alumnos = obtenerAlumnos();
+    alumnos.sort((a, b) => {
+        const promedioA =  a.calcularPromedio();
+        const promedioB = b.calcularPromedio();
+        return promedioB - promedioA;
+    });
+    mostrarResultados(alumnos);
+}
+//Funcion Ordenar por calificacion Descendente
+function ordenarAlumnosCalificacionDescendente(){
+    const alumnos = obtenerAlumnos();
+    alumnos.sort((a, b) => {
+        const promedioA = a.calcularPromedio();
+        const promedioB = b.calcularPromedio();
+        return promedioA - promedioB;
+
+    });
+    mostrarResultados(alumnos);
+}
+
+//ORDENAR FIN
 
 function borrarDatos() {
     localStorage.removeItem('alumnos');
