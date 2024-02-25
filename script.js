@@ -289,7 +289,6 @@ function mostrarResultados(resultados) {
                 <th>Nombre</th>
                 <th>Apellidos</th>
                 <th>Edad</th>
-                <th>Calificacion</th>
             </tr>
         `;
         resultados.forEach(alumno => {
@@ -298,7 +297,6 @@ function mostrarResultados(resultados) {
                 <td>${alumno.nombre}</td>
                 <td>${alumno.apellidos}</td>
                 <td>${alumno.edad}</td>
-                <td>${alumno.calcularPromedio()}</td>
             `;
             table.appendChild(row);
         });
@@ -353,7 +351,37 @@ function mostrarPromedioAlumnos(resultados) {
         `;
         table.appendChild(row);
     });
-
+}
+    function mostrarCalificacionAD(resultados) {
+        const resultadosDiv = document.getElementById('mostrarResultadosCalificacion');
+        
+        // eliminar tablas previas
+        let tablaDivElement = document.getElementById("tablaDiv");
+        if (tablaDivElement !== null) {
+            tablaDivElement.remove();
+        }
+        // Crear un div para la tabla
+        const tablaDiv = document.createElement('div');
+        tablaDiv.setAttribute("id", "tablaDiv");
+    
+        // Crear la tabla
+        const table = document.createElement('table');
+        table.innerHTML = `
+            <tr>
+                <th>Nombre</th>
+                <th>Apellidos</th>
+                <th>Calificacion</th>
+            </tr>
+        `;
+        resultados.forEach(alumno => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${alumno.nombre}</td>
+                <td>${alumno.apellidos}</td>
+                <td>${alumno.promedio}</td>
+            `;
+            table.appendChild(row);
+        });
     // Agregar la tabla al div
     tablaDiv.appendChild(table);
 
@@ -388,24 +416,43 @@ function ordenarAlumnosDescendente() {
 function ordenarAlumnosCalificacionAscendente(){
     //const alumnos = obtenerAlumnos().filter(alumno => alumno.materias.some(materia => materia.calificacion !== null));
     const alumnos = obtenerAlumnos();
-    alumnos.sort((a, b) => {
-        const promedioA =  a.calcularPromedio();
-        const promedioB = b.calcularPromedio();
+    const resultados = alumnos.map(alumno => {
+        const promedio = alumno.calcularPromedio();
+        if (!isNaN(promedio)) {
+            return {
+            nombre: alumno.nombre,
+            apellidos: alumno.apellidos,
+            promedio: promedio.toFixed(2)
+            };
+        }
+    }).filter(Boolean);
+    resultados.sort((a, b) => {
+        const promedioA =  a.promedio;
+        const promedioB = b.promedio;
         return promedioB - promedioA;
     });
-    mostrarResultados(alumnos);
+    mostrarCalificacionAD(resultados);
 }
 //Funcion Ordenar por calificacion Descendente
 function ordenarAlumnosCalificacionDescendente(){
     //const alumnos = obtenerAlumnos().filter(alumno => alumno.materias.some(materia => materia.calificacion !== null));
     const alumnos = obtenerAlumnos();
-    alumnos.sort((a, b) => {
-        const promedioA = a.calcularPromedio();
-        const promedioB = b.calcularPromedio();
+    const resultados = alumnos.map(alumno => {
+        const promedio = alumno.calcularPromedio();
+        if (!isNaN(promedio)) {
+            return {
+            nombre: alumno.nombre,
+            apellidos: alumno.apellidos,
+            promedio: promedio.toFixed(2)
+            };
+        }
+    }).filter(Boolean);
+    resultados.sort((a, b) => {
+        const promedioA =  a.promedio;
+        const promedioB = b.promedio;
         return promedioA - promedioB;
-
     });
-    mostrarResultados(alumnos);
+    mostrarCalificacionAD(resultados);
 }
 
 //ORDENAR FIN
