@@ -306,6 +306,7 @@ function mostrarResultados(resultados) {
     }
 }
 
+
 // Devuelve un array con los promedios de todos los alumnos con calificacion
 function obtenerPromedioAlumnos() {
     const alumnos = obtenerAlumnos();
@@ -385,6 +386,7 @@ function ordenarAlumnosDescendente() {
 //Ordenar alumnos por calificacion
 //Funcion Ordenar por calificacion Ascendente
 function ordenarAlumnosCalificacionAscendente(){
+    //const alumnos = obtenerAlumnos().filter(alumno => alumno.materias.some(materia => materia.calificacion !== null));
     const alumnos = obtenerAlumnos();
     alumnos.sort((a, b) => {
         const promedioA =  a.calcularPromedio();
@@ -395,6 +397,7 @@ function ordenarAlumnosCalificacionAscendente(){
 }
 //Funcion Ordenar por calificacion Descendente
 function ordenarAlumnosCalificacionDescendente(){
+    //const alumnos = obtenerAlumnos().filter(alumno => alumno.materias.some(materia => materia.calificacion !== null));
     const alumnos = obtenerAlumnos();
     alumnos.sort((a, b) => {
         const promedioA = a.calcularPromedio();
